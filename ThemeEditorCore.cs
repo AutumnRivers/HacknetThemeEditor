@@ -16,6 +16,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using Pathfinder.Executable;
+using HacknetThemeEditor.Patches;
 
 namespace HacknetThemeEditor
 {
@@ -32,6 +33,18 @@ namespace HacknetThemeEditor
         public static IntPtr imGuiTexture;
 
         public static List<string> backgroundImages = new List<string>();
+
+        public static readonly Dictionary<string, OSTheme> layoutNameToTheme = new()
+        {
+            { "blue", OSTheme.HacknetBlue },
+            { "green", OSTheme.HackerGreen },
+            { "white", OSTheme.HacknetWhite },
+            { "mint", OSTheme.HacknetMint },
+            { "greencompact", OSTheme.GreenCompact },
+            { "riptide", OSTheme.Riptide },
+            { "riptide2", OSTheme.Riptide2 },
+            { "colamaeleon", OSTheme.Colamaeleon }
+        };
 
         public override bool Load()
         {
@@ -52,19 +65,8 @@ namespace HacknetThemeEditor
 
             imGuiTexture = _imGuiRenderer.BindTexture(imGuiFNA);
 
-            ExtensionInfo activeExtInfo = ExtensionLoader.ActiveExtensionInfo;
-
-            string backgroundsPath = activeExtInfo.FolderPath + "/Themes/Backgrounds/";
-
-            if (Directory.Exists(backgroundsPath))
-            {
-                foreach (string backgroundImagePath in Directory.GetFiles(backgroundsPath))
-                {
-                    string backgroundFileName = Path.GetFileName(backgroundImagePath);
-
-                    backgroundImages.Add(backgroundFileName);
-                }
-            }
+            IllustratorFunctions.LoadBackgroundImageFiles();
+            IllustratorFunctions.LoadExistingThemeFiles();
 
             return true;
         }

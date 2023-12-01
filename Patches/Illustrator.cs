@@ -33,6 +33,7 @@ namespace HacknetThemeEditor.Patches
 
         private static int selectedLayout = 0;
         private static int selectedBackground = 0;
+        private static int selectedTheme = 0;
 
         private static int oldBackgroundSelection = -1;
 
@@ -45,13 +46,16 @@ namespace HacknetThemeEditor.Patches
             "blue", "green", "white", "mint", "greencompact", "riptide", "riptide2", "colamaeleon"
         };
 
-        private static List<string> backgroundImages = ThemeEditorCore.backgroundImages;
-
         private static readonly string extensionFolder = ExtensionLoader.ActiveExtensionInfo.FolderPath;
         private static readonly string backgroundsFolder = extensionFolder + "/Themes/Backgrounds/";
 
+        public static List<string> backgroundImages = ThemeEditorCore.backgroundImages;
+        public static List<string> existingThemes = new List<string>() { "-- NONE --" };
+
         public static Texture2D backgroundTexture;
         public static bool backgroundNeedsChanging = false;
+
+        public static string currentlyLoadedTheme = null;
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(OS), "drawScanlines")]
@@ -106,16 +110,6 @@ namespace HacknetThemeEditor.Patches
             DrawImGuiLayout(currentThemeColors);
 
             _imGuiRenderer.AfterLayout();
-
-            if(backgroundImages.Any())
-            {
-                IllustratorFunctions.LoadBackgroundImage(backgroundsFolder + backgroundImages[selectedBackground]);
-            }
-
-            if (backgroundTexture != null)
-            {
-                ThemeManager.backgroundImage = backgroundTexture;
-            }
 
             #region apply theme colors
             __instance.defaultHighlightColor = currentThemeColors.defaultHighlightColor;
@@ -172,15 +166,64 @@ namespace HacknetThemeEditor.Patches
         {
             ImGui.Text("Hacknet Theme Editor -- v" + ThemeEditorCore.ModVer);
 
+            if(ImGui.TreeNode("Existing Themes"))
+            {
+                if(existingThemes.Any())
+                {
+                    ImGui.ListBox("Theme Files", ref selectedTheme, existingThemes.ToArray<string>(), existingThemes.Count);
+                }
+
+                if(ImGui.Button("Refresh Themes List"))
+                {
+                    IllustratorFunctions.LoadExistingThemeFiles();
+                }
+
+                if(ImGui.Button("Apply Theme"))
+                {
+                    string themesFolder = ExtensionLoader.ActiveExtensionInfo.FolderPath + "/Themes/";
+                    string themeSelection = existingThemes[selectedTheme];
+
+                    string themePath = themesFolder + themeSelection;
+
+                    OS.currentInstance.EffectsUpdater.StartThemeSwitch(
+                        0.5f, OSTheme.Custom, OS.currentInstance,
+                        themePath
+                        );
+                }
+
+                ImGui.TreePop();
+            }
+
             if(ImGui.TreeNode("Theme Basics"))
             {
                 ImGui.ListBox("Theme Layout", ref selectedLayout, themeLayoutNames, themeLayoutNames.Count());
 
-                ImGui.Text("Due to technical limitations, the layout cannot be previewed in-game.");
+                if (ImGui.Button("Apply Layout"))
+                {
+                    ThemeManager.switchThemeLayout(OS.currentInstance, ThemeEditorCore.layoutNameToTheme[themeLayoutNames[selectedLayout]]);
+                }
 
                 if(backgroundImages.Any())
                 {
                     ImGui.ListBox("Background Image", ref selectedBackground, backgroundImages.ToArray<string>(), backgroundImages.Count);
+
+                    if(ImGui.Button("Refresh Backgrounds List"))
+                    {
+                        IllustratorFunctions.LoadBackgroundImageFiles();
+                    }
+
+                    if(ImGui.Button("Apply Background"))
+                    {
+                        if (backgroundImages.Any())
+                        {
+                            IllustratorFunctions.LoadBackgroundImage(backgroundsFolder + backgroundImages[selectedBackground]);
+                        }
+
+                        if (backgroundTexture != null)
+                        {
+                            ThemeManager.backgroundImage = backgroundTexture;
+                        }
+                    }
                 }
 
                 ImGui.TreePop();
@@ -217,12 +260,15 @@ namespace HacknetThemeEditor.Patches
             
             if(ImGui.Button("Test Flash")) { IllustratorFunctions.TestFlash(); }
             if(ImGui.Button("Export to XML...")) {
-                if(WriteThemeXML())
+                try
                 {
+                    WriteThemeXML();
+
                     infoMessage = "Success! Theme file created.";
-                } else
+                } catch(Exception e)
                 {
-                    infoMessage = "Error writing to theme file";
+                    Console.WriteLine("Error writing theme XML :: " + e);
+                    infoMessage = "Error writing to theme file -- check game console for more information";
                 }
             }
 
@@ -314,6 +360,43 @@ namespace HacknetThemeEditor.Patches
             backgroundStream.Dispose();
 
             Illustrator.backgroundNeedsChanging = false;
+        }
+
+        public static void LoadBackgroundImageFiles()
+        {
+            Illustrator.backgroundImages.Clear();
+
+            ExtensionInfo activeExtInfo = ExtensionLoader.ActiveExtensionInfo;
+
+            string backgroundsPath = activeExtInfo.FolderPath + "/Themes/Backgrounds/";
+
+            if (Directory.Exists(backgroundsPath))
+            {
+                foreach (string backgroundImagePath in Directory.GetFiles(backgroundsPath))
+                {
+                    string backgroundFileName = Path.GetFileName(backgroundImagePath);
+
+                    Illustrator.backgroundImages.Add(backgroundFileName);
+                }
+            }
+        }
+
+        public static void LoadExistingThemeFiles()
+        {
+            Illustrator.existingThemes.Clear();
+
+            ExtensionInfo activeExtInfo = ExtensionLoader.ActiveExtensionInfo;
+            string themesPath = activeExtInfo.FolderPath + "/Themes/";
+
+            if (Directory.Exists(themesPath))
+            {
+                foreach (string themeFilePath in Directory.GetFiles(themesPath))
+                {
+                    if (!themeFilePath.EndsWith(".xml")) { continue; }
+
+                    Illustrator.existingThemes.Add(Path.GetFileName(themeFilePath));
+                }
+            }
         }
     }
 }
