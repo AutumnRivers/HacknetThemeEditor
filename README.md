@@ -14,6 +14,5 @@ Self-explanatory. In-game tool for editing Hacknet themes in real time. Made spe
 4. Profit!
 
 # "Gotchas"
-* No sub-directory support for theme or background files yet
 * No editing AlienwareFX colors - you'll have to do that manually
 * Due to a bug with text input, the theme file name will always be the current unix time in seconds. You can manually rename the file after you export it
