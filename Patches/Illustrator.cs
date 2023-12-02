@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Text;
+using System.Linq;
 using System.Reflection;
 using System.IO;
 using System.Xml;
@@ -21,15 +23,13 @@ using BepInEx;
 using HacknetThemeEditor.Extensions;
 
 using Num = System.Numerics;
-using System;
-using System.Text;
 
 namespace HacknetThemeEditor.Patches
 {
     [HarmonyPatch]
     public class Illustrator
     {
-        private static readonly ImGuiRenderer _imGuiRenderer = ThemeEditorCore._imGuiRenderer;
+        private static readonly ImGuiRenderer _imGuiRenderer = MainMenuLoad._imGuiRenderer;
 
         private static int selectedLayout = 0;
         private static int selectedBackground = 0;
@@ -43,14 +43,14 @@ namespace HacknetThemeEditor.Patches
 
         private static readonly string[] themeLayoutNames = new string[]
         {
-            "blue", "green", "white", "mint", "greencompact", "riptide", "riptide2", "colamaeleon"
+            "blue", "green", "white", "mint", "greencompact", "riptide", "riptide2", "colamaeleon", "purple"
         };
 
-        private static readonly string extensionFolder = ExtensionLoader.ActiveExtensionInfo.FolderPath;
-        private static readonly string backgroundsFolder = extensionFolder + "/Themes/Backgrounds/";
+        private static string ExtensionFolder => ExtensionLoader.ActiveExtensionInfo.FolderPath;
+        private static string BackgroundsFolder => ExtensionFolder + "/Themes/Backgrounds/";
 
-        public static List<string> backgroundImages = ThemeEditorCore.backgroundImages;
-        public static List<string> existingThemes = new List<string>() { "-- NONE --" };
+        public static List<string> backgroundImages = new();
+        public static List<string> existingThemes = new() { "-- NONE --" };
 
         public static Texture2D backgroundTexture;
         public static bool backgroundNeedsChanging = false;
@@ -216,7 +216,7 @@ namespace HacknetThemeEditor.Patches
                     {
                         if (backgroundImages.Any())
                         {
-                            IllustratorFunctions.LoadBackgroundImage(backgroundsFolder + backgroundImages[selectedBackground]);
+                            IllustratorFunctions.LoadBackgroundImage(BackgroundsFolder + backgroundImages[selectedBackground]);
                         }
 
                         if (backgroundTexture != null)
@@ -378,6 +378,32 @@ namespace HacknetThemeEditor.Patches
 
                     Illustrator.backgroundImages.Add(backgroundFileName);
                 }
+
+                foreach(string subDirectoryPath in Directory.GetDirectories(backgroundsPath))
+                {
+
+
+                    LoadBackgroundImageSubdirectories(subDirectoryPath);
+                }
+            }
+        }
+
+        private static void LoadBackgroundImageSubdirectories(string subDirPath)
+        {
+            char sepChar = Path.AltDirectorySeparatorChar;
+            string[] seperator = new string[] { $"{sepChar}Themes{sepChar}Backgrounds{sepChar}" };
+            string subDirName = subDirPath.Split(seperator, StringSplitOptions.RemoveEmptyEntries)[1];
+
+            foreach (string backgroundImagePath in Directory.GetFiles(subDirPath))
+            {
+                string backgroundFileName = subDirName + sepChar + Path.GetFileName(backgroundImagePath);
+
+                Illustrator.backgroundImages.Add(backgroundFileName);
+            }
+
+            foreach(string subDirectoryPath in Directory.GetDirectories(subDirPath))
+            {
+                LoadBackgroundImageSubdirectories(subDirectoryPath);
             }
         }
 
@@ -396,6 +422,32 @@ namespace HacknetThemeEditor.Patches
 
                     Illustrator.existingThemes.Add(Path.GetFileName(themeFilePath));
                 }
+
+                foreach(string themeSubDirectory in Directory.GetDirectories(themesPath))
+                {
+                    LoadThemeSubdirectories(themeSubDirectory);
+                }
+            }
+        }
+
+        private static void LoadThemeSubdirectories(string subDirPath)
+        {
+            char sepChar = Path.AltDirectorySeparatorChar;
+            string[] seperator = new string[] { $"{sepChar}Themes{sepChar}" };
+            string subDirName = subDirPath.Split(seperator, StringSplitOptions.RemoveEmptyEntries)[1];
+
+            foreach (string themeFilePath in Directory.GetFiles(subDirPath))
+            {
+                if (!themeFilePath.EndsWith(".xml")) { continue; }
+
+                string themeFileName = subDirName + sepChar + Path.GetFileName(themeFilePath);
+
+                Illustrator.existingThemes.Add(themeFileName);
+            }
+
+            foreach(string themeSubDirectory in Directory.GetDirectories(subDirPath))
+            {
+                LoadThemeSubdirectories(themeSubDirectory);
             }
         }
     }

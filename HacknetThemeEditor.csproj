@@ -103,6 +103,7 @@
     <Compile Include="Extensions\StringExts.cs" />
     <Compile Include="ImGuiRenderer.cs" />
     <Compile Include="Patches\Illustrator.cs" />
+    <Compile Include="Patches\MainMenuLoad.cs" />
     <Compile Include="ThemeEditorCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

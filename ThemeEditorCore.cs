@@ -25,14 +25,7 @@ namespace HacknetThemeEditor
     {
         public const string ModGUID = "autumnrivers.themeeditor";
         public const string ModName = "HN Theme Editor Plugin";
-        public const string ModVer = "1.0.0";
-
-        public static ImGuiRenderer _imGuiRenderer;
-
-        public static Texture2D imGuiFNA;
-        public static IntPtr imGuiTexture;
-
-        public static List<string> backgroundImages = new List<string>();
+        public const string ModVer = "1.0.1";
 
         public static readonly Dictionary<string, OSTheme> layoutNameToTheme = new()
         {
@@ -43,51 +36,17 @@ namespace HacknetThemeEditor
             { "greencompact", OSTheme.GreenCompact },
             { "riptide", OSTheme.Riptide },
             { "riptide2", OSTheme.Riptide2 },
-            { "colamaeleon", OSTheme.Colamaeleon }
+            { "colamaeleon", OSTheme.Colamaeleon },
+            { "purple", OSTheme.HacknetPurple }
         };
 
         public override bool Load()
         {
             HarmonyInstance.PatchAll(typeof(ThemeEditorCore).Assembly);
 
-            GraphicsDevice userGraphics = GuiData.spriteBatch.GraphicsDevice;
-
             ExecutableManager.RegisterExecutable<ExampleExecutable>("#EXAMPLE_EXEC#");
 
-            _imGuiRenderer = new ImGuiRenderer(Game1.singleton);
-            _imGuiRenderer.RebuildFontAtlas();
-
-            imGuiFNA = CreateTexture(userGraphics, 300, 150, pixel =>
-            {
-                var red = (pixel % 300) / 2;
-                return new Color(red, 1, 1);
-            });
-
-            imGuiTexture = _imGuiRenderer.BindTexture(imGuiFNA);
-
-            IllustratorFunctions.LoadBackgroundImageFiles();
-            IllustratorFunctions.LoadExistingThemeFiles();
-
             return true;
-        }
-
-        public static Texture2D CreateTexture(GraphicsDevice device, int width, int height, Func<int, Color> paint)
-        {
-            //initialize a texture
-            var texture = new Texture2D(device, width, height);
-
-            //the array holds the color for each pixel in the texture
-            Color[] data = new Color[width * height];
-            for (var pixel = 0; pixel < data.Length; pixel++)
-            {
-                //the function applies the color according to the specified pixel
-                data[pixel] = paint(pixel);
-            }
-
-            //set the color
-            texture.SetData(data);
-
-            return texture;
         }
     }
 
