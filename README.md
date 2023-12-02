@@ -10,9 +10,8 @@ Self-explanatory. In-game tool for editing Hacknet themes in real time. Made spe
 # INSTALLATION (READ THIS!!!!!!!!!!!)
 1. Download the [latest release](https://github.com/AutumnRivers/HacknetThemeEditor/releases)
 2. Unzip the file
-3. Place all DLLs in the `/global` folder to Hacknet's global plug-in directory. (`<HacknetInstall>/BepInEx/plugins`)
-4. Place the main DLL (`HacknetThemeEditor.dll`) in your target extension's `/Plugins` folder.
-5. Profit!
+3. ~~Place all DLLs in the `/global` folder to Hacknet's global plug-in directory. (`<HacknetInstall>/BepInEx/plugins`)~~ As of 1.0.1, all files go in the global plugins directory.
+4. Profit!
 
 # "Gotchas"
 * No sub-directory support for theme or background files yet
