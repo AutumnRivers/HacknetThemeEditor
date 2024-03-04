@@ -76,7 +76,7 @@ namespace HacknetThemeEditor.Patches
                 defaultHighlightColor = __instance.defaultHighlightColor,
                 defaultTopBarColor = __instance.defaultTopBarColor,
                 moduleColorSolidDefault = __instance.moduleColorSolidDefault,
-                moduleColorSolidStrong = __instance.moduleColorStrong,
+                moduleColorStrong = __instance.moduleColorStrong,
                 moduleColorBacking = __instance.moduleColorBacking,
                 exeModuleTopBar = __instance.exeModuleTopBar,
                 exeModuleTitleText = __instance.exeModuleTitleText,
@@ -121,7 +121,7 @@ namespace HacknetThemeEditor.Patches
             __instance.moduleColorSolidDefault = currentThemeColors.moduleColorSolidDefault;
             __instance.moduleColorSolid = currentThemeColors.moduleColorSolidDefault;
 
-            __instance.moduleColorStrong = currentThemeColors.moduleColorSolidStrong;
+            __instance.moduleColorStrong = currentThemeColors.moduleColorStrong;
 
             __instance.moduleColorBacking = currentThemeColors.moduleColorBacking;
 

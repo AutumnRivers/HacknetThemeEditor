@@ -25,7 +25,7 @@ namespace HacknetThemeEditor
     {
         public const string ModGUID = "autumnrivers.themeeditor";
         public const string ModName = "HN Theme Editor Plugin";
-        public const string ModVer = "1.0.1";
+        public const string ModVer = "1.0.2";
 
         public static readonly Dictionary<string, OSTheme> layoutNameToTheme = new()
         {
@@ -55,7 +55,7 @@ namespace HacknetThemeEditor
         public Color defaultHighlightColor;
         public Color defaultTopBarColor;
         public Color moduleColorSolidDefault;
-        public Color moduleColorSolidStrong;
+        public Color moduleColorStrong;
         public Color moduleColorBacking;
         public Color exeModuleTopBar;
         public Color exeModuleTitleText;
